@@ -158,11 +158,95 @@
 // export default Jobs;
 
 
+// import { useEffect, useState } from "react";
+// import JobCard from "../components/JobCard";
+// import Navbar from "../components/Navbar";
+// import Footer from "../components/Footer";
+// import "./jobs.css";
+
+// function Jobs() {
+//   const [jobs, setJobs] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     fetchJobs();
+//   }, []);
+
+//   const fetchJobs = async () => {
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       const response = await fetch("https://dummyjson.com/products");
+//       if (!response.ok) throw new Error("Failed to fetch jobs");
+
+//       const data = await response.json();
+//       setJobs(data.products);
+//     } catch (err) {
+//       setError(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <>
+//       <Navbar />
+
+//       <section className="jobs-page">
+//         <div className="jobs-header">
+//           <h1>Explore Opportunities</h1>
+//           <p>Find roles that match your skills & ambitions</p>
+//         </div>
+
+//         {loading && (
+//           <div className="loader-container">
+//             <div className="spinner"></div>
+//             <p>Loading jobs...</p>
+//           </div>
+//         )}
+
+//         {error && (
+//           <div className="error-box">
+//             <h3>Something went wrong</h3>
+//             <p>{error}</p>
+//             <button onClick={fetchJobs}>Retry</button>
+//           </div>
+//         )}
+
+//         {!loading && !error && (
+//           <div className="jobs-grid">
+//             {jobs.map((job) => (
+//               <JobCard
+//                 key={job.id}
+//                 job={{
+//                   title: job.title,
+//                   company: "Tech Corp",
+//                   experience: "2–5 years",
+//                   salary: "₹6–10 LPA",
+//                 }}
+//               />
+//             ))}
+//           </div>
+//         )}
+//       </section>
+
+//       <Footer />
+//     </>
+//   );
+// }
+
+// export default Jobs;
+
 import { useEffect, useState } from "react";
 import JobCard from "../components/JobCard";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import "./jobs.css";
+import "./Jobs.css";
+import { fetchJobsAPI } from "../services/jobService";
+import { REFRESH_INTERVAL, JOB_LIMIT } from "../constants/api";
+
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -171,6 +255,8 @@ function Jobs() {
 
   useEffect(() => {
     fetchJobs();
+    const interval = setInterval(fetchJobs, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchJobs = async () => {
@@ -178,13 +264,13 @@ function Jobs() {
       setLoading(true);
       setError("");
 
-      const response = await fetch("https://dummyjson.com/products");
-      if (!response.ok) throw new Error("Failed to fetch jobs");
+      const res = await fetch("https://remotive.com/api/remote-jobs");
+      if (!res.ok) throw new Error("Failed to fetch jobs");
 
-      const data = await response.json();
-      setJobs(data.products);
+      const data = await res.json();
+      setJobs(data.jobs.slice(0, 20));
     } catch (err) {
-      setError(err.message);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -194,43 +280,40 @@ function Jobs() {
     <>
       <Navbar />
 
-      <section className="jobs-page">
-        <div className="jobs-header">
-          <h1>Explore Opportunities</h1>
-          <p>Find roles that match your skills & ambitions</p>
+      <div className="jobs-page">
+        {/* LEFT SIDEBAR */}
+        <div className="sidebar">
+          <div className="profile-card">
+            <div className="cover"></div>
+            <div className="avatar"></div>
+            <h3>recruitmentzecser</h3>
+            <p>Web Developer</p>
+          </div>
+
+          <div className="menu">
+            <div>Preferences</div>
+            <div>Applied Jobs</div>
+            <div>Skill Assessment</div>
+          </div>
         </div>
 
-        {loading && (
-          <div className="loader-container">
-            <div className="spinner"></div>
-            <p>Loading jobs...</p>
-          </div>
-        )}
+        {/* JOBS LISTING*/}
+        <div className="jobs-content">
+          <h2>Top job picks for you</h2>
+          <p className="subtitle">
+            Based on your profile, preferences, and recent activity
+          </p>
 
-        {error && (
-          <div className="error-box">
-            <h3>Something went wrong</h3>
-            <p>{error}</p>
-            <button onClick={fetchJobs}>Retry</button>
-          </div>
-        )}
+          {loading && <div className="loader"></div>}
+          {error && <div className="error">{error}</div>}
 
-        {!loading && !error && (
-          <div className="jobs-grid">
-            {jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={{
-                  title: job.title,
-                  company: "Tech Corp",
-                  experience: "2–5 years",
-                  salary: "₹6–10 LPA",
-                }}
-              />
+          {!loading &&
+            !error &&
+            jobs.map((job) => (
+              <JobCard key={job.id} job={job} />
             ))}
-          </div>
-        )}
-      </section>
+        </div>
+      </div>
 
       <Footer />
     </>
@@ -238,3 +321,4 @@ function Jobs() {
 }
 
 export default Jobs;
+
