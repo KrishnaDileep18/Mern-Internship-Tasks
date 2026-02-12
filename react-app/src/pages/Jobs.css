@@ -298,6 +298,7 @@ body {
   align-items: center;
   margin-bottom: 12px;
   transition: 0.3s;
+  margin-top: 20px;
 }
 
 .job-card:hover {

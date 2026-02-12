@@ -239,17 +239,101 @@
 
 // export default Jobs;
 
+// import { useEffect, useState } from "react";
+// import JobCard from "../components/JobCard";
+// import Navbar from "../components/Navbar";
+// import Footer from "../components/Footer";
+// import "./Jobs.css";
+// import { fetchJobsAPI } from "../services/jobService";
+// import { REFRESH_INTERVAL, JOB_LIMIT } from "../constants/api";
+// import SearchBar from "../components/SearchBar";
+
+
+// function Jobs() {
+//   const [jobs, setJobs] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     fetchJobs();
+//     const interval = setInterval(fetchJobs, 30000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   const fetchJobs = async () => {
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       const res = await fetch("https://remotive.com/api/remote-jobs");
+//       if (!res.ok) throw new Error("Failed to fetch jobs");
+
+//       const data = await res.json();
+//       setJobs(data.jobs.slice(0, 20));
+//     } catch (err) {
+//       setError("Something went wrong. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <>
+//       <Navbar />
+
+//       <div className="jobs-page">
+//         {/* LEFT SIDEBAR */}
+//         <div className="sidebar">
+//           <div className="profile-card">
+//             <div className="cover"></div>
+//             <div className="avatar"></div>
+//             <h3>recruitmentzecser</h3>
+//             <p>Web Developer</p>
+//           </div>
+
+//           <div className="menu">
+//             <div>Preferences</div>
+//             <div>Applied Jobs</div>
+//             <div>Skill Assessment</div>
+//           </div>
+//         </div>
+
+//         {/* JOBS LISTING*/}
+//         <div className="jobs-content">
+//           <h2>Top job picks for you</h2>
+//           <p className="subtitle">
+//             Based on your profile, preferences, and recent activity
+//           </p>
+
+//           {loading && <div className="loader"></div>}
+//           {error && <div className="error">{error}</div>}
+
+//           {!loading &&
+//             !error &&
+//             jobs.map((job) => (
+//               <JobCard key={job.id} job={job} />
+//             ))}
+//         </div>
+//       </div>
+
+//       <Footer />
+//     </>
+//   );
+// }
+
+// export default Jobs;
+
+
 import { useEffect, useState } from "react";
 import JobCard from "../components/JobCard";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "./Jobs.css";
-import { fetchJobsAPI } from "../services/jobService";
-import { REFRESH_INTERVAL, JOB_LIMIT } from "../constants/api";
-
+import SearchBar from "../components/SearchBar"; // ✅ FIXED PATH
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]); // for search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -268,12 +352,23 @@ function Jobs() {
       if (!res.ok) throw new Error("Failed to fetch jobs");
 
       const data = await res.json();
-      setJobs(data.jobs.slice(0, 20));
+      const topJobs = data.jobs.slice(0, 20);
+
+      setJobs(topJobs);
+      setFilteredJobs(topJobs); // initialize filtered jobs
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  // 🔍 Search Function
+  const handleSearch = (query) => {
+    const filtered = jobs.filter((job) =>
+      job.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredJobs(filtered);
   };
 
   return (
@@ -297,19 +392,22 @@ function Jobs() {
           </div>
         </div>
 
-        {/* JOBS LISTING*/}
+        {/* JOBS LISTING */}
         <div className="jobs-content">
           <h2>Top job picks for you</h2>
           <p className="subtitle">
             Based on your profile, preferences, and recent activity
           </p>
 
+          {/* ✅ SEARCH BAR ADDED HERE */}
+          <SearchBar onSearch={handleSearch} />
+
           {loading && <div className="loader"></div>}
           {error && <div className="error">{error}</div>}
 
           {!loading &&
             !error &&
-            jobs.map((job) => (
+            filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
         </div>

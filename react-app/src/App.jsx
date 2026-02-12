@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Jobs from "./pages/Jobs";
 
+
 function App() {
   return (
     <Routes>
